@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Chord Diagram & Country Expulsion Trends</title>
+    <meta charset="UTF-8"> <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="main-container">
+        <div id="left-panel">
+            <div id="chart"></div>
+        </div>
+        <div id="right-panel">
+            <div id="controls-container">
+                <div id="event-type-filters">
+                    <button class="filter-button active" id="btn-expulsion" data-event-type="1">Expulsion</button>
+                    <button class="filter-button active" id="btn-deportation" data-event-type="2">Deportation</button>
+                    <button class="filter-button active" id="btn-repatriation" data-event-type="3">Repatriation</button>
+                    <button class="filter-button active" id="btn-escape" data-event-type="4">Escape</button>
+                </div>
+                <div id="slider-container">
+                    <div id="year-slider"></div>
+                    <div id="slider-values">
+                        <span id="start-year-value"></span> - <span id="end-year-value"></span>
+                    </div>
+                </div>
+            </div>
+            <div id="line-chart-container-wrapper">
+                <svg id="line-chart-svg"></svg>
+            </div>
+            <div id="bibliography-container">
+                <div id="bibliography-content">
+                    <p class="bibliography-placeholder" style="font-size:12px; color:#777;">Sources for the current line chart view will appear here.</p>
+                </div>
+            </div>
+        </div> </div> <div id="tooltip"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wnumb/1.2.0/wNumb.min.js"></script>
+
+    <script src="chord_diagram.js"></script>
+    <script src="bibliography.js"></script>
+    <script src="line_chart.js"></script>
+    <script src="app_controller.js"></script>
+
+</body>
+</html>
