@@ -1,8 +1,8 @@
 // --- chord_diagram.js ---
 
 // Assumes d3 is globally available
-// Map to store fixed colors for each country
 const countryColorMap = new Map();
+let nodeIdList = []; // << Declare nodeIdList in the module scope
 
 // Function to generate a lively, somewhat random color
 function generateLivelyColor() {
@@ -13,47 +13,82 @@ function generateLivelyColor() {
 }
 
 function updateChart(selectedStartYear, selectedEndYear) {
-    const linkAggregates = new Map();
-    const nodeIdsInFilteredData = new Set();
-    let totalFilteredValue = 0;
+    // Step 1: Filter originalValidEvents by activeEventTypes first
+    const relevantEvents = originalValidEvents.filter(d => activeEventTypes.has(d.event_type_num));
 
-    originalValidEvents.forEach(d => {
-        if (!activeEventTypes.has(d.event_type_num)) { return; }
-        const eventStart = d.start_year_num;
-        const eventEnd = d.end_year_num;
-        const estimate = d.mean_estimate_num;
-        const origin = d.origin_name_viz;
-        const target = d.target_name_viz;
+    // Step 2: Calculate and store annual estimates, preparing for averaging
+    const yearlyAggregatedEstimates = new Map();
 
-        if (!origin || !target) {
+    relevantEvents.forEach(event => {
+        if (!event.origin_name_viz || !event.target_name_viz || event.mean_estimate_num <= 0) {
             return;
         }
-        if (eventStart > eventEnd || estimate <= 0) { return; }
+        const duration = event.end_year_num - event.start_year_num + 1;
+        if (duration <= 0) return;
+        const annualEstimate = event.mean_estimate_num / duration;
+        const expelledGroupKey = String(event.expelled_group || 'N/A').trim();
 
-        const overlapStart = Math.max(eventStart, selectedStartYear);
-        const overlapEnd = Math.min(eventEnd, selectedEndYear);
-        const overlapDuration = overlapEnd - overlapStart + 1;
-
-        if (overlapDuration > 0) {
-            const eventDuration = eventEnd - eventStart + 1;
-            const proportion = eventDuration > 0 ? overlapDuration / eventDuration : 0;
-            const adjustedEstimate = estimate * proportion;
-            if (adjustedEstimate > 0) {
-                const key = `${origin}->${target}`;
-                const currentSum = linkAggregates.get(key) || 0;
-                linkAggregates.set(key, currentSum + adjustedEstimate);
-                nodeIdsInFilteredData.add(origin);
-                nodeIdsInFilteredData.add(target);
-                totalFilteredValue += adjustedEstimate;
+        for (let year = event.start_year_num; year <= event.end_year_num; year++) {
+            if (!yearlyAggregatedEstimates.has(year)) {
+                yearlyAggregatedEstimates.set(year, new Map());
             }
+            const yearMap = yearlyAggregatedEstimates.get(year);
+            const uniqueKeyParams = [event.origin_name_viz, event.target_name_viz, expelledGroupKey, event.event_type_num];
+            const uniqueKeyString = JSON.stringify(uniqueKeyParams);
+
+            if (!yearMap.has(uniqueKeyString)) {
+                yearMap.set(uniqueKeyString, { sumAnnual: 0, count: 0 });
+            }
+            const stats = yearMap.get(uniqueKeyString);
+            stats.sumAnnual += annualEstimate;
+            stats.count += 1;
         }
     });
+
+    // Step 3: Calculate final averaged annual rates
+    const finalAnnualRates = new Map();
+    for (const [year, yearMap] of yearlyAggregatedEstimates) {
+        const finalYearRatesMap = new Map();
+        for (const [uniqueKeyString, stats] of yearMap) {
+            if (stats.count > 0) {
+                finalYearRatesMap.set(uniqueKeyString, stats.sumAnnual / stats.count);
+            }
+        }
+        if (finalYearRatesMap.size > 0) {
+            finalAnnualRates.set(year, finalYearRatesMap);
+        }
+    }
+
+    // Step 4: Aggregate these final rates for the chord diagram links based on selected year range
+    const linkAggregates = new Map();
+    const nodeIdsInFilteredData = new Set(); // This will be used to populate the module-scoped nodeIdList
+    let totalFilteredValue = 0;
+
+    for (let year = selectedStartYear; year <= selectedEndYear; year++) {
+        if (finalAnnualRates.has(year)) {
+            const yearRatesMap = finalAnnualRates.get(year);
+            for (const [uniqueKeyString, averagedAnnualRate] of yearRatesMap) {
+                const [origin, target, _expelledGroup, eventTypeNum] = JSON.parse(uniqueKeyString);
+
+                if (activeEventTypes.has(eventTypeNum)) {
+                    const chordKey = `${origin}->${target}`;
+                    linkAggregates.set(chordKey, (linkAggregates.get(chordKey) || 0) + averagedAnnualRate);
+                    nodeIdsInFilteredData.add(origin); // Collect unique node IDs
+                    nodeIdsInFilteredData.add(target); // Collect unique node IDs
+                    totalFilteredValue += averagedAnnualRate;
+                }
+            }
+        }
+    }
 
     chordSvg.selectAll(".groups").remove();
     chordSvg.selectAll(".chords").remove();
     chordSvg.selectAll(".no-data-text").remove();
 
-    if (nodeIdsInFilteredData.size === 0 || totalFilteredValue <= 0) {
+    // Update the module-scoped nodeIdList
+    nodeIdList = Array.from(nodeIdsInFilteredData).sort();
+
+    if (nodeIdList.length === 0 || totalFilteredValue <= 0) {
         chordSvg.append("text").attr("class", "no-data-text").text("No data for selected chord filters.").attr("text-anchor", "middle").attr("dy", "0.3em").attr("fill", "#666");
         if (selectedCountryForLineChart) {
             drawOrUpdateLineChart(selectedCountryForLineChart, selectedStartYear, selectedEndYear);
@@ -63,7 +98,6 @@ function updateChart(selectedStartYear, selectedEndYear) {
         return;
     }
 
-    const nodeIdList = Array.from(nodeIdsInFilteredData).sort();
     const nodeIndex = new Map(nodeIdList.map((id, i) => [id, i]));
     const numNodes = nodeIdList.length;
     const matrix = Array(numNodes).fill(0).map(() => Array(numNodes).fill(0));
@@ -77,19 +111,17 @@ function updateChart(selectedStartYear, selectedEndYear) {
         }
     });
 
-    // Ensure all nodes in the current view have a color in the map
     nodeIdList.forEach(id => {
         if (!countryColorMap.has(id)) {
             countryColorMap.set(id, generateLivelyColor());
         }
     });
 
-    // Create a D3 color scale using the fixed colors from the map
     const color = d3.scaleOrdinal()
         .domain(nodeIdList)
         .range(nodeIdList.map(id => countryColorMap.get(id)));
 
-    const chordLayout = d3.chord().padAngle(arcPadAngle).sortGroups(d3.descending).sortChords(null);
+    const chordLayout = d3.chord().padAngle(arcPadAngle).sortGroups(d3.descending).sortSubgroups(d3.descending).sortChords(null);
     let chords;
     try {
         chords = chordLayout(matrix);
@@ -123,13 +155,16 @@ function updateChart(selectedStartYear, selectedEndYear) {
         .attr("d", ribbonGenerator)
         .attr("fill", d => color(nodeIdList[d.source.index]))
         .attr("stroke", d => d3.rgb(color(nodeIdList[d.source.index])).darker())
-        .each(function(d) { d.filteredValue = matrix[d.source.index][d.target.index]; });
+        .each(function(d) {
+            d.aggregatedValue = matrix[d.source.index][d.target.index];
+        });
 
     const handleGroupMouseOver = (event, d_group) => {
-        const countryName = nodeIdList[d_group.index];
+        const countryName = nodeIdList[d_group.index]; // nodeIdList is now module-scoped
         let tooltipHtml = `<b>${countryName}</b>\n`;
         tooltipHtml += "(Forced) Migration to:\n";
         let outgoingFlows = [];
+
         for (let targetIndex = 0; targetIndex < numNodes; targetIndex++) {
             if (d_group.index !== targetIndex && matrix[d_group.index][targetIndex] > 0) {
                 outgoingFlows.push({
@@ -140,6 +175,7 @@ function updateChart(selectedStartYear, selectedEndYear) {
         }
         outgoingFlows.sort((a, b) => b.value - a.value);
         const top5Destinations = outgoingFlows.slice(0, 5);
+
         if (top5Destinations.length > 0) {
             const destinationsString = top5Destinations
                 .map(flow => `  • ${flow.targetName} (${formatNumber(flow.value)})`)
@@ -155,10 +191,10 @@ function updateChart(selectedStartYear, selectedEndYear) {
     };
 
     const handleChordMouseOver = (event, d_chord) => {
-        const sourceName = nodeIdList[d_chord.source.index];
-        const targetName = nodeIdList[d_chord.target.index];
+        const sourceName = nodeIdList[d_chord.source.index]; // nodeIdList is now module-scoped
+        const targetName = nodeIdList[d_chord.target.index]; // nodeIdList is now module-scoped
         let tooltipHtml = `<b>Migration from ${sourceName} to ${targetName}</b>\n`;
-        tooltipHtml += `Aggregated estimate of Migration: ${formatNumber(d_chord.filteredValue)}`;
+        tooltipHtml += `Aggregated estimate of Migration: ${formatNumber(d_chord.aggregatedValue)}`;
         tooltip.html(tooltipHtml.trim()).transition().duration(200).style("opacity", 1);
         ribbon.classed("faded", c => c !== d_chord);
         groupPath.classed("faded", p => p.index !== d_chord.source.index && p.index !== d_chord.target.index);
@@ -176,6 +212,7 @@ function updateChart(selectedStartYear, selectedEndYear) {
         ribbon.classed("faded", false);
     };
 
+    // Event handlers are set up here. handleGroupClick will now have access to the module-scoped nodeIdList
     groupPath.on("mouseover", handleGroupMouseOver)
              .on("mousemove", handleMouseMove)
              .on("mouseout", handleMouseOut)
@@ -192,10 +229,10 @@ function updateChart(selectedStartYear, selectedEndYear) {
     }
 }
 
-function handleGroupClick(event, d) {
+// handleGroupClick uses the module-scoped nodeIdList
+function handleGroupClick(event, d) { // d is the D3 datum for the clicked group
     event.stopPropagation();
-    const groupElement = d3.select(this.parentNode);
-    const countryName = groupElement.select("text").text();
+    const countryName = nodeIdList[d.index]; // Access module-scoped nodeIdList
     selectedCountryForLineChart = countryName;
 
     if (yearSliderInstance) {
