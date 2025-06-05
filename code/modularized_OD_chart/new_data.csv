@@ -1,4 +1,4 @@
-﻿origin_id,origin_name,target_id,target_name,expelled_group,start_year,end_year,lower_bound,mean_estimate,upper_bound,event_type,is_annual_estimate,data_source_id,description,in_unhcr,unhcr_numer,comment,difference_unhcr_mean_estimate
+﻿origin_id,origin_name,target_id,target_name,expelled_group,year,end_year,lower_bound,mean_estimate,upper_bound,event_type,is_annual_estimate,data_source_id,description,in_unhcr,unhcr_numer,comment,difference_unhcr_mean_estimate
 4,Afghanistan,356,India,Hindus; Sikhs,1992,1994,12300,12300,12300,1,,5,expulsion of Hindus and Sikhs,TRUE,14655,,
 12,Algeria,504,Morocco,Moroccans,1975,1976,30000,30000,30000,1,,1,expulsion of migrant workers,FALSE,NA,,
 12,Algeria,504,Morocco,Moroccans,1975,1975,350000,350000,350000,1,,14,expulsion of migrant workers,FALSE,NA,,
