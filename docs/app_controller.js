@@ -1,7 +1,7 @@
 // --- app_controller.js ---
 const csvFilePath = 'annualized_data.csv';
 const dataSourceCsvPath = 'data_source.csv';
-const countryIsoCsvPath = '../../../../resources/country_ISO_mapping.csv'; // Path to your ISO mapping CSV
+const countryIsoCsvPath = '../resources/country_ISO_mapping.csv'; // Path to your ISO mapping CSV
 
 const dataMinYear = 1950;
 const dataMaxYear = 2025;
