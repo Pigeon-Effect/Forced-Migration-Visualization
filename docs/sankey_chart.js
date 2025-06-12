@@ -324,14 +324,14 @@ function drawSankeyChart(selectedCountry, selectedStartYear, selectedEndYear, cu
                 .attr("r", flagRadius - 0.75);
 
             let alpha2Code = null;
-            const fallbackFlagUrl = "../resources/country_flags/xx.svg";
+            const fallbackFlagUrl = "resources/country_flags/xx.svg";
             let finalFlagUrl = fallbackFlagUrl;
 
             if (typeof countryIsoMapGlobal !== 'undefined' && countryIsoMapGlobal && typeof selectedCountry === 'string' && countryIsoMapGlobal.has(selectedCountry.trim())) {
                 alpha2Code = countryIsoMapGlobal.get(selectedCountry.trim());
             }
             if (alpha2Code && alpha2Code.trim() !== "") {
-                finalFlagUrl = `../resources/country_flags/${alpha2Code.trim().toLowerCase()}.svg`;
+                finalFlagUrl = `resources/country_flags/${alpha2Code.trim().toLowerCase()}.svg`;
             }
 
             const img = group.append("image")
