@@ -36,37 +36,51 @@ body {
     gap: 15px;
     min-width: 0;
     height: 100%;
+    overflow-y: auto;
 }
 
-#chart {
+#chart, #sankey-chart-container {
      width: 100%;
      height: 100%;
      background-color: #fff;
      border-radius: 8px;
      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
      box-sizing: border-box;
+     padding: 10px; /* Inner padding for the white box */
+}
+
+#chart {
      display: flex;
      justify-content: center;
      align-items: center;
 }
 
-#controls-container {
-     width: 100%;
-     background-color: #fff;
-     border-radius: 8px;
-     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-     padding: 15px;
-     box-sizing: border-box;
-     flex-shrink: 0;
+#sankey-chart-container {
+    display: none;
+    position: relative;
 }
 
-#line-chart-container-wrapper {
+#controls-container,
+#line-chart-container-wrapper,
+#bibliography-container,
+#country-search-container {
      width: 100%;
      background-color: #fff;
      border-radius: 8px;
      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
      padding: 15px;
      box-sizing: border-box;
+}
+
+#controls-container {
+     flex-shrink: 0;
+}
+#country-search-container {
+    margin-bottom: 15px; /* Was in previous version */
+}
+
+
+#line-chart-container-wrapper {
      flex-grow: 2;
      flex-basis: 200px;
      min-height: 150px;
@@ -74,12 +88,6 @@ body {
 }
 
 #bibliography-container {
-    width: 100%;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    padding: 15px;
-    box-sizing: border-box;
     flex-grow: 1;
     flex-basis: 100px;
     min-height: 80px;
@@ -105,35 +113,13 @@ body {
     font-weight: bold;
 }
 
-#bibliography-content .source-id-cell { /* << Renamed for clarity */
-    width: auto; /* Let it size based on content, or set a min-width */
+#bibliography-content .source-id-cell {
+    width: auto;
     min-width: 30px;
-    text-align: left; /* Changed from center for potentially longer IDs */
+    text-align: left;
     font-weight: bold;
-    word-break: break-all; /* In case IDs are very long */
+    word-break: break-all;
 }
-
-.citation-marker circle.mask { /* Style for the masking circle */
-    fill: white; /* Or the background color of the chart plot area */
-}
-.citation-marker circle.data-circle { /* Style for the actual data circle */
-    stroke: white;
-    stroke-width: 0.75px;
-    opacity: 0.9;
-}
-.citation-marker text {
-    font-size: 6px;
-    font-weight: bold;
-    fill: white;
-    text-anchor: middle;
-    dominant-baseline: central;
-    pointer-events: none;
-}
-.citation-marker:hover circle.data-circle { /* Hover effect on the data circle */
-    opacity: 1;
-    stroke-width: 1px;
-}
-
 
 #event-type-filters {
      display: flex;
@@ -142,19 +128,12 @@ body {
      gap: 10px;
      padding-bottom: 15px;
 }
- #slider-container {
+
+#slider-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 10px 25px 5px 25px;
- }
-
-.group text {
-    font-size: 10px;
-    fill: #333;
-    pointer-events: none;
-    transition: opacity 0.2s ease-in-out;
-    font-family: inherit;
 }
 
 .filter-button {
@@ -179,7 +158,6 @@ body {
 .filter-button:hover:not(.active) { opacity: 0.75; }
 .filter-button.active:hover { opacity: 0.85; }
 
-
 #year-slider {
      width: 100%;
      margin-bottom: 8px;
@@ -199,13 +177,20 @@ body {
     border: 1px solid #bbb; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     right: -5px; top: -5px; cursor: default !important;
 }
- .noUi-handle:active { cursor: default !important; border-color: #999; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
- .noUi-handle:focus { outline: none; }
+.noUi-handle:active { cursor: default !important; border-color: #999; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.noUi-handle:focus { outline: none; }
 .noUi-handle::before, .noUi-handle::after { display: none; }
 
 .chord path { fill-opacity: 0.7; stroke: #fff; stroke-width: 0.5px; transition: opacity 0.2s ease-in-out; }
 .group path { stroke: #fff; stroke-width: 1px; transition: opacity 0.2s ease-in-out; cursor: pointer; }
 .group path:hover { stroke-width: 2px; stroke: #555; }
+.group text {
+    font-size: 10px;
+    fill: #333;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+    font-family: inherit;
+}
 .faded { opacity: 0.1 !important; }
 
 #tooltip {
@@ -220,66 +205,71 @@ body {
     height: 100%;
     box-sizing: border-box;
 }
-.line-chart-axis-label {
-    font-size: 10px;
-    fill: #555;
+.line-chart-axis-label { font-size: 10px; fill: #555; }
+.line-chart-title { font-size: 13px; font-weight: bold; fill: #333; text-anchor: middle; }
+.line-chart-placeholder { font-size: 12px; fill: #777; text-anchor: middle; }
+.line { stroke-width: 1.5px; }
+.axis path, .axis line { fill: none; stroke: #ccc; shape-rendering: crispEdges; }
+.axis text { font-size: 9px; fill: #555; }
+
+.legend { font-family: sans-serif; font-size: 10px; }
+.legend rect { stroke-width: 0.5px; stroke: #666; }
+.legend text { fill: #333; dominant-baseline: middle; }
+
+.citation-marker circle.mask { fill: white; }
+.citation-marker circle.data-circle { stroke: none; opacity: 0.9; cursor: help; }
+.citation-marker text { font-size: 7px; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none;}
+.citation-marker:hover circle.data-circle { opacity: 1; }
+
+#country-search-input {
+    width: 100%; padding: 8px 12px; font-size: 12px;
+    border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;
 }
-.line-chart-title {
-    font-size: 13px;
-    font-weight: bold;
-    fill: #333;
-    text-anchor: middle;
+#country-search-results {
+    max-height: 200px; overflow-y: auto; margin-top: 8px;
+    border: 1px solid #eee; border-radius: 4px; display: none;
 }
- .line-chart-placeholder {
-    font-size: 12px;
-    fill: #777;
-    text-anchor: middle;
+.country-search-item {
+    padding: 8px 12px; cursor: pointer; font-size: 12px;
+    border-bottom: 1px solid #f0f0f0;
 }
-.line {
-    stroke-width: 1.5px;
+.country-search-item:hover { background-color: #f5f5f5; }
+.country-search-item:last-child { border-bottom: none; }
+
+#back-to-chord-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1;
+    background-color: rgba(220, 220, 220, 0.6);
+    color: #333;
+    border: 1px solid #bbb;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s;
+    z-index: 10;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
-.axis path, .axis line {
-    fill: none;
-    stroke: #ccc;
-    shape-rendering: crispEdges;
-}
-.axis text {
-    font-size: 9px;
-    fill: #555;
+#back-to-chord-button:hover {
+    background-color: rgba(180, 180, 180, 0.8);
+    color: #000;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
 }
 
-.legend {
-    font-family: sans-serif;
-    font-size: 10px;
-}
-.legend rect {
-    stroke-width: 0.5px;
-    stroke: #666;
-}
-.legend text {
-    fill: #333;
-    dominant-baseline: middle;
-}
-
-.citation-marker circle.mask {
-    fill: white;
-}
-.citation-marker circle.data-circle {
-    /* stroke: white; /* REMOVED */
-    /* stroke-width: 0.75px; /* REMOVED */
-    stroke: none; /* << ADDED: Explicitly no border */
-    opacity: 0.9; /* Keep opacity if desired, or set to 1 */
-    cursor: help;
-}
-.citation-marker text {
-    font-size: 7px; /* This will be overridden by inline style in JS if you keep it there */
-    font-weight: bold;
-    /* fill: white; /* Color will be set to black in JS */
-    text-anchor: middle;
-    dominant-baseline: central;
+#sankey-svg .node rect { shape-rendering: crispEdges; }
+#sankey-svg .node:hover rect { opacity: 0.8; }
+#sankey-svg .link:hover path { stroke-opacity: 0.8; }
+#sankey-svg .node text,
+.sankey-node-name,
+.sankey-node-value {
     pointer-events: none;
-}
-.citation-marker:hover circle.data-circle {
-    opacity: 1;
-    /* stroke-width: 1px; /* Not relevant if no stroke */
+    user-select: none;
+    font-family: sans-serif;
 }
