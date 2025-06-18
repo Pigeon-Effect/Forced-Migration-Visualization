@@ -534,14 +534,14 @@ function drawSankeyChart(selectedCountry, selectedStartYear, selectedEndYear, cu
                 .attr("r", flagRadius - 0.75);
 
             let alpha2Code = null;
-            const fallbackFlagUrl = "../../../../resources/country_flags/xx.svg";
+            const fallbackFlagUrl = "resources/country_flags/xx.svg";
             let finalFlagUrl = fallbackFlagUrl;
 
             if (typeof countryIsoMapGlobal !== 'undefined' && countryIsoMapGlobal && typeof selectedCountry === 'string' && countryIsoMapGlobal.has(selectedCountry.trim())) {
                 alpha2Code = countryIsoMapGlobal.get(selectedCountry.trim());
             }
             if (alpha2Code && alpha2Code.trim() !== "") {
-                finalFlagUrl = `../../../../resources/country_flags/${alpha2Code.trim().toLowerCase()}.svg`;
+                finalFlagUrl = `resources/country_flags/${alpha2Code.trim().toLowerCase()}.svg`;
             }
 
             const img = group.append("image")
@@ -622,8 +622,8 @@ function drawSankeyChart(selectedCountry, selectedStartYear, selectedEndYear, cu
     function getCountryFlagHtmlSankey(countryName, size = 24) {
         if (!countryIsoMapGlobal) return '';
         const alpha2Code = countryIsoMapGlobal.get(countryName.trim()) || 'xx';
-        const flagUrl = `../../../../resources/country_flags/${alpha2Code.toLowerCase()}.svg`;
-        const fallbackUrl = '../../../../resources/country_flags/xx.svg';
+        const flagUrl = `resources/country_flags/${alpha2Code.toLowerCase()}.svg`;
+        const fallbackUrl = 'resources/country_flags/xx.svg';
         return `<div style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;margin-right:8px;vertical-align:middle;background:#f0f0f0;border:1px solid #ddd;line-height:0;"><img src="${flagUrl}" alt="${countryName} flag" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.src='${fallbackUrl}'"></div>`;
     }
 
