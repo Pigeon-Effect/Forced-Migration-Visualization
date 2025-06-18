@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         allCountries = [...new Set([...originCountries, ...targetCountries])].sort();
 
         // Set up event listeners
+        countrySearchInput.style.fontFamily = "'Times New Roman', Times, serif";
+        countrySearchResults.style.fontFamily = "'Times New Roman', Times, serif";
         countrySearchInput.addEventListener('input', handleSearchInput);
         countrySearchInput.addEventListener('focus', () => {
             if (countrySearchInput.value.length > 0) {

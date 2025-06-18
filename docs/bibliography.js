@@ -12,6 +12,7 @@ function updateBibliography(uniqueSourceIds = []) {
 
     const table = document.createElement('table');
     table.classList.add('bibliography-table');
+    table.style.fontFamily = "'Times New Roman', Times, serif";
 
     const thead = document.createElement('thead');
     const tbody = document.createElement('tbody');
