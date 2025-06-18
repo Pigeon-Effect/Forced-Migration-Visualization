@@ -47,8 +47,8 @@ function getCountryFlagHtml(countryName, size = 24) {
     if (!countryIsoMapGlobal) return '';
 
     const alpha2Code = countryIsoMapGlobal.get(countryName.trim()) || 'xx';
-    const flagUrl = `../../../../resources/country_flags/${alpha2Code.toLowerCase()}.svg`;
-    const fallbackUrl = '../../../../resources/country_flags/xx.svg';
+    const flagUrl = `resources/country_flags/${alpha2Code.toLowerCase()}.svg`;
+    const fallbackUrl = 'resources/country_flags/xx.svg';
 
     return `
         <div style="
