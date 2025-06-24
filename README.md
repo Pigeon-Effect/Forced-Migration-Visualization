@@ -20,43 +20,5 @@ Temporal Trend Analysis
 ![line_chart](https://raw.githubusercontent.com/Pigeon-Effect/Forced-Migration-Visualization/main/results/line_chart_1986_2025.svg)
 Displays migration trends over time. Points represent median estimates, shaded areas show uncertainty ranges. Automatically updates based on country selection and filters.
 
-Technical Features
-Dynamic Filtering: Real-time updates across all visualizations
-
-Event Type Focus: Isolate specific migration types (expulsions, deportations, etc.)
-
-Temporal Analysis: Adjustable year ranges (1950-2025)
-
-Data Export: Download visualizations as SVG files
-
-Source Attribution: Automatic bibliography generation for data points
-
-Data Processing
-Diagram
-Code
 
 
-
-
-
-
-Usage
-bash
-git clone https://github.com/Pigeon-Effect/Forced-Migration-Visualization.git
-cd Forced-Migration-Visualization
-# Open index.html in browser
-Dependencies
-D3.js (v7)
-
-d3-sankey
-
-noUiSlider
-
-wNumb
-
-Data Sources
-Annualized migration event data
-
-Country ISO mappings
-
-Source bibliography metadata
